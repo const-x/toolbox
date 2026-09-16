@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.github.const-x</groupId>
+    <artifactId>toolbox</artifactId>
+    <version>1.0.2-SNAPSHOT</version>
+
+    <packaging>pom</packaging>
+
+
+    <name>Toolbox</name>
+    <description>A modular Java toolbox for development, debugging, and data-processing tasks, providing reusable utilities for strings, files, dates, mathematics, HTTP, encryption, JDBC, Excel, mail, text processing, interactive shells, code analysis, and GitLab integrations.
+    </description>
+    <url>https://github.com/const-x/toolbox</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>const-x</id>
+            <name>const-x</name>
+            <url>https://github.com/const-x</url>
+            <roles>
+                <role>developer</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/const-x/toolbox/issues</url>
+    </issueManagement>
+
+    <scm>
+        <connection>scm:git:git://github.com/const-x/toolbox.git</connection>
+        <developerConnection>scm:git:ssh://git@github/const-x/toolbox.git</developerConnection>
+        <url>https://github.com/const-x/toolbox</url>
+        <tag>toolbox-v1.0.1</tag>
+    </scm>
+
+    <modules>
+        <module>base-utils</module>
+        <module>tools</module>
+        <module>console</module>
+        <module>console_ext</module>
+        <module>text</module>
+        <module>excel</module>
+        <module>mail</module>
+        <module>annotation</module>
+    </modules>
+
+    <properties>
+        <revision>${project.version}</revision>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <!-- 环境标识：默认未设置，需通过 -P 显式指定 -->
+        <environment>none</environment>
+        <!-- 测试跳过策略：默认不跳过 -->
+        <skipTests>false</skipTests>
+        <gpg.skip>${environment.equals('dev')}</gpg.skip>
+    </properties>
+
+    <build>
+        <plugins>
+
+            <!-- mvn -B release:prepare -DreleaseVersion=1.0.0 -DdevelopmentVersion=1.0.1-SNAPSHOT -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>3.2.0</version>
+                <configuration>
+                    <!-- 使用 @{project.artifactId} 动态获取当前模块的 artifactId -->
+                    <tagNameFormat>@{project.artifactId}-v@{project.version}</tagNameFormat>
+                    <!-- 自动将所有子模块的版本号更新为父模块的发布版本 -->
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <!--默认情况下，插件会在 prepare 阶段自动 push 代码和 tag-->
+                    <pushChanges>false</pushChanges>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.10.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <doclint>none</doclint>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.2.7</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <passphraseServerId>gpg-central</passphraseServerId>
+                    <gpgArguments>
+                        <arg>--pinentry-mode</arg>
+                        <arg>loopback</arg>
+                    </gpgArguments>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <dependencyManagement>
+        <dependencies>
+        </dependencies>
+    </dependencyManagement>
+
+    <profiles>
+
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <environment>dev</environment>
+                <!-- 开发环境跳过 GPG 签名，加快构建 -->
+                <gpg.skip>true</gpg.skip>
+                <!-- 开发环境可跳过测试以加速迭代 -->
+                <skipTests>false</skipTests>
+            </properties>
+            <!-- 开发环境可配置内部快照仓库 -->
+            <distributionManagement>
+                <repository>
+                    <id>internal-snapshots</id>
+                    <name>Internal Snapshot Repository</name>
+                    <url>https://repo.internal.dev/snapshots</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+
+        <profile>
+            <id>staging</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <environment>staging</environment>
+                <!-- 测试环境仍需 GPG 签名，但可跳过部分检查 -->
+                <gpg.skip>false</gpg.skip>
+                <skipTests>false</skipTests>
+            </properties>
+            <!-- 测试环境可配置 staging 仓库 -->
+            <distributionManagement>
+                <repository>
+                    <id>staging</id>
+                    <name>Staging Repository</name>
+                    <url>https://repo.internal.staging/releases</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+
+        <profile>
+            <id>prod</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <environment>prod</environment>
+                <gpg.skip>false</gpg.skip>
+                <skipTests>true</skipTests>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.7.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>maven-central</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
+
+</project>

@@ -1,0 +1,16 @@
+Toolbox
+Copyright 2026 const-x
+
+This product includes software developed by contributors to the Toolbox
+project.
+
+The module tools contains code derived from the following Apache License 2.0
+projects. The original copyright and license notices are retained in the
+corresponding source files:
+
+* FreeOTP, Copyright (C) 2014 Nathaniel McCallum, Red Hat
+* Base32String implementation, Copyright 2009 Google Inc.
+
+This project also depends on third-party libraries. Their respective
+copyright notices and license terms apply to those libraries and are not
+replaced by this NOTICE file.

@@ -1,0 +1,14 @@
+/AGENTS.md
+/CLAUDE.md
+/.claude/
+/*/target/
+/target/
+/release.properties
+*.releaseBackup
+
+.idea/
+*.iml
+.DS_Store
+${project.build.directory}/
+
+/console_ext/src/test/java/idv/const_x/console/GitLabTest.java
