@@ -102,13 +102,13 @@ public class ConsoleIOProxy {
 
 		public void warning(String message) {
 			if (level <= INFO_LEVEL_WARN && !silent) {
-				printLabel("WARN ", ConsoleColorEnum.YELLOW, message);
+				printLabel("WARN", ConsoleColorEnum.YELLOW, " "+message);
 			}
 		}
 
 		public void info(String message) {
 			if (level <= INFO_LEVEL_INFO && !silent) {
-				printLabel("INFO ", ConsoleColorEnum.GREEN, message);
+				printLabel("INFO", ConsoleColorEnum.GREEN, " "+message);
 			}
 		}
 
