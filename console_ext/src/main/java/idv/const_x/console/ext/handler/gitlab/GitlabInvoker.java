@@ -4,13 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import idv.const_x.http.AbsInvokeResultHandler;
-import idv.const_x.http.DefaultInvokeHandler;
-import idv.const_x.http.HttpInvokeResultHandler;
 import idv.const_x.http.HttpInvoker;
 import idv.const_x.utils.StringExtUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -172,6 +172,46 @@ public class GitlabInvoker {
         return invoke(provider,project,path,params,HttpInvoker.GET);
     }
 
+    public static String search(IGitLabInfoProvider provider, String project, String scope, String keyword,
+                                String branch, int page) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("scope", scope);
+        params.put("search", keyword);
+        params.put("ref", branch);
+        params.put("per_page", 100);
+        params.put("page", page);
+        return invoke(provider, project, "/search", params, HttpInvoker.GET);
+    }
+
+    public static String fileBlame(IGitLabInfoProvider provider, String project, String branch, String path) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("ref", branch);
+        try {
+            String encodedPath = URLEncoder.encode(path, "UTF-8").replace("+", "%20");
+            return invoke(provider, project, "/repository/files/" + encodedPath + "/blame", params, HttpInvoker.GET);
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public static String fileBlameHtml(IGitLabInfoProvider provider, String project, String branch, String path) {
+        try {
+            String projectPath = provider.switch2Projectkey(project).replace("%2F", "/").replace("%2f", "/")
+                    .replace("+", "%20");
+            String encodedBranch = URLEncoder.encode(branch, "UTF-8").replace("+", "%20");
+            String encodedPath = URLEncoder.encode(path, "UTF-8").replace("%2F", "/").replace("+", "%20");
+            String webUrl = provider.getBaseWebUrl(project);
+            if (StringExtUtils.isBlank(webUrl)) {
+                throw new IllegalArgumentException("gitlab web请求url不能为空");
+            }
+            String url = webUrl + (webUrl.endsWith("/") ? "" : "/") + projectPath
+                    + "/blame/" + encodedBranch + "/" + encodedPath;
+            return invokeUrl(url, new HashMap<>(), HttpInvoker.GET, provider.getGitToken(project));
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
 
     protected static String invoke(IGitLabInfoProvider provider,String project,String path, Map<String, Object> params, String method)  {
         return invoke(provider,project,path,params,method,null);
@@ -184,7 +224,6 @@ public class GitlabInvoker {
         if (method == null) {
             method = HttpInvoker.GET;
         }
-        Map<String, String> hearder = new HashMap<>();
         if (token == null) {
             token = provider.getGitToken(project);
         }
@@ -196,8 +235,15 @@ public class GitlabInvoker {
             throw new IllegalArgumentException("gitlab请求url不能为空");
         }
         String baseUrl = url + path;
+        return invokeUrl(baseUrl, params, method, token);
+    }
+
+    private static String invokeUrl(String baseUrl, Map<String, Object> params, String method, String token) {
+        if (StringExtUtils.isBlank(token)) {
+            throw new IllegalArgumentException("gitlab请求token不能为空");
+        }
+        Map<String, String> hearder = new HashMap<>();
         hearder.put("PRIVATE-TOKEN", token);
-        HttpInvokeResultHandler handler = new DefaultInvokeHandler();
         final String[] res = {null};
         try {
             HttpInvoker.invoke(baseUrl, method, params, hearder,  new AbsInvokeResultHandler() {

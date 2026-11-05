@@ -57,7 +57,7 @@ public class BatchHandler extends AbsHandler{
 		
 		BooleanParamComponent alignment = new BooleanParamComponent("alignment");
 		alignment.setDescription("是否对齐");
-		alignment.setDefaultValue(true);
+		alignment.setDefaultValue(false);
 		super.addParamComponent(alignment);
 		
 		BooleanParamComponent sort = new BooleanParamComponent("sort");
